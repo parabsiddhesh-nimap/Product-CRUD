@@ -2,6 +2,16 @@ const db = require('../models/index');
 const { setUser, getUsertoken,secretKey } = require('../service/auth');
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs');
+const multer  = require('multer');
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        return cb(null, './uploads')
+    },
+    filename: function (req, file, cb) {
+        return cb(null,`${Date.now()}-${file.originalname}` )
+    }
+})
+const upload = multer({ storage: storage })
 
 
 //Middleware
@@ -118,6 +128,8 @@ const createUser = async (req, res) => {
     res.status(201).json(newUser);
 };
 
+const handleUpload = upload.single('avatar')
+
 module.exports =
 {
     userSingUp,
@@ -125,5 +137,19 @@ module.exports =
     createUser,
     handleUserLogin,
     getUser,
-    auth
+    auth,
+    handleUpload
 };
+
+        // //upload photo
+        // const storage = multer.diskStorage({
+        //     destination: function (req, file, cb) {
+        //       cb(null, './uploads')
+        //     },
+        //     filename: function (req, file, cb) {
+        //       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        //       cb(null, file.fieldname + '-' + uniqueSuffix)
+        //     }
+        //   })
+          
+        //   const upload = multer({ storage: storage })
