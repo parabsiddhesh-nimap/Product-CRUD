@@ -1,7 +1,16 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../models/index');
-const {userSingUp, handleUserLogin,passwordValidity,createUser,getUser,auth,handleUpload} = require("../middleware/userMiddleware");
+const {userSingUp, 
+    handleUserLogin,
+    passwordValidity,
+    createUser,
+    getUser,
+    auth,
+    handleUpload,
+    unblockUserAcc,
+    blockAccount
+} = require("../middleware/userMiddleware");
 const multer  = require('multer');
 //for file upload
 const storage = multer.diskStorage({
@@ -16,7 +25,7 @@ const upload = multer({ storage: storage })
 
 router.post('/signup', userSingUp,passwordValidity,createUser);
 
-router.post('/login', handleUserLogin);
+router.post('/login', handleUserLogin,blockAccount);
 
 router.get('/user/', auth,getUser); 
 
@@ -47,6 +56,8 @@ router.get('/userAll', async(req,res) => {
     // if(user.password!== password) return res.status(400).json({error: 'Invalid password'});
     res.status(200).json(user)
 });
+
+router.post('/unblock', unblockUserAcc)
 
 
 module.exports = router;

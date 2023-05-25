@@ -72,20 +72,29 @@ const userSingUp = async (req, res, next) => {
     }
 };
 
-const handleUserLogin = async (req, res) => {
+const handleUserLogin = async (req, res,next) => {
     try {
         const { email, password } = req.body;
         let newToken = req.headers.authorization;
         const user = await db.user.findOne({ where: { email: email } });
         if (!user) return res.status(404).json({ error: 'User not found' });
+        let wrongpasswordcnt = user.dataValues.wrongpasswordcnt;
         const chkPassword = await bcrypt.compare(password, user.password);
-        if (!chkPassword) return res.status(400).json({ error: 'Invalid password' });
-        if (!newToken && user) {
+        if (!chkPassword && user) {
+            // return res.status(400).json({ error: 'Invalid Password' });
+            req.data = user.dataValues;
+            next();
+        }
+        else if (!newToken && chkPassword && wrongpasswordcnt<5) {
             let name = user.dataValues.name;
             token = setUser(name, email, 40);
             let refreshToken = jwt.sign({name,email},secretKey);
+            resetpassCnt(email)
             res.status(200).json({token,refreshToken});
-        } else return res.status(400).json({ error: 'User Logged In' });
+        } else {
+            req.data = user.dataValues;
+            next();
+        }
     } catch (err) {
         console.log(err);
         res.status(500).json({ error: 'Internal server error' });
@@ -128,6 +137,44 @@ const createUser = async (req, res) => {
     res.status(201).json(newUser);
 };
 
+const blockAccount = async (req, res) => {
+    const user = req.data;
+    console.log('user !!!',user);
+    let count = user.wrongpasswordcnt;
+    if (count < 5) {
+        count += 1
+        console.log('Inside count function ----',count)
+        await db.user.update(
+            { wrongpasswordcnt :  count},
+            { where: { email: user.email } }
+          )
+        return res.status(400).json({ error: `Invalid password.${ (count > 2) ? `You have ${6-count} attempts left` : `` }` });
+    }
+    else return res.status(400).json({ error: 'Your Account is Blocked. Reach to Administrator' });
+}
+
+const unblockUserAcc = async (req,res) => {
+    const { email } = req.body;
+    const user = await db.user.findOne({ where: { email: email } });
+    if(user){
+        await db.user.update(
+            { wrongpasswordcnt :  0},
+            { where: { email: user.email } }
+        )
+        res.status(200).json({ message: `Account Unblocked of user ${email}` });
+    }
+}
+
+const resetpassCnt = async (email) => {
+    const user = await db.user.findOne({ where: { email: email } });
+    if(user){
+        user.dataValues.wrongpasswordcnt = 0;
+        await db.user.update(
+            { wrongpasswordcnt : 0},
+            { where: { email: user.email } }
+        )
+    }
+}
 const handleUpload = upload.single('avatar')
 
 module.exports =
@@ -138,7 +185,9 @@ module.exports =
     handleUserLogin,
     getUser,
     auth,
-    handleUpload
+    handleUpload,
+    unblockUserAcc,
+    blockAccount
 };
 
         // //upload photo
