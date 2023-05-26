@@ -3,6 +3,7 @@ const { setUser, getUsertoken,secretKey } = require('../service/auth');
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs');
 const multer  = require('multer');
+const nodemailer = require("nodemailer");
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         return cb(null, './uploads')
@@ -177,6 +178,37 @@ const resetpassCnt = async (email) => {
 }
 const handleUpload = upload.single('avatar')
 
+const sendEmail = async (req,res) => { 
+    let testAccount = await nodemailer.createTestAccount();
+    receiverData = req.userData;
+    console.log(receiverData);
+
+    var transporter = nodemailer.createTransport(({
+        host: "smtp.ethereal.email",
+        port: 587,
+        auth: {
+          user: 'zoie.dare@ethereal.email', //demo account
+          pass: 'wMttaZy7HcD2uB1kdZ'        //demo password
+        }
+      }));
+      
+      var mailOptions = {
+        from: 'somerealemail@gmail.com',
+        to: receiverData.email,
+        subject: 'Sending Email using Node.js[nodemailer] to ' + receiverData.name,
+        text: 'This was successfully sent'
+      }
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });  
+    
+}
+
 module.exports =
 {
     userSingUp,
@@ -187,7 +219,8 @@ module.exports =
     auth,
     handleUpload,
     unblockUserAcc,
-    blockAccount
+    blockAccount,
+    sendEmail
 };
 
         // //upload photo

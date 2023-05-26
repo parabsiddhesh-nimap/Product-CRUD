@@ -9,7 +9,8 @@ const {userSingUp,
     auth,
     handleUpload,
     unblockUserAcc,
-    blockAccount
+    blockAccount,
+    sendEmail
 } = require("../middleware/userMiddleware");
 const multer  = require('multer');
 //for file upload
@@ -57,7 +58,9 @@ router.get('/userAll', async(req,res) => {
     res.status(200).json(user)
 });
 
-router.post('/unblock', unblockUserAcc)
+router.post('/unblock', unblockUserAcc);
+
+router.post('/sendEmail',auth, sendEmail);
 
 
 module.exports = router;
