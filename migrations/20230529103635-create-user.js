@@ -19,7 +19,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       phone: {
-        type: Sequelize.NUMBER
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,

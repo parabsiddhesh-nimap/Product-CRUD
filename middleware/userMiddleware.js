@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require('bcryptjs');
 const multer  = require('multer');
 const nodemailer = require("nodemailer");
+const moment = require('moment');
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         return cb(null, './uploads')
@@ -55,7 +56,7 @@ const getUser = async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.send(user)
 
-}
+} 
 
 const userSingUp = async (req, res, next) => {
     try {
@@ -80,6 +81,7 @@ const handleUserLogin = async (req, res,next) => {
         const user = await db.user.findOne({ where: { email: email } });
         if (!user) return res.status(404).json({ error: 'User not found' });
         let wrongpasswordcnt = user.dataValues.wrongpasswordcnt;
+        let user_id=user.dataValues.id;
         const chkPassword = await bcrypt.compare(password, user.password);
         if (!chkPassword && user) {
             // return res.status(400).json({ error: 'Invalid Password' });
@@ -88,8 +90,8 @@ const handleUserLogin = async (req, res,next) => {
         }
         else if (!newToken && chkPassword && wrongpasswordcnt<5) {
             let name = user.dataValues.name;
-            token = setUser(name, email, 40);
-            let refreshToken = jwt.sign({name,email},secretKey);
+            token = setUser(user_id,name, email, 40);
+            let refreshToken = jwt.sign({user_id,name,email},secretKey);
             resetpassCnt(email)
             res.status(200).json({token,refreshToken});
         } else {
@@ -181,31 +183,33 @@ const handleUpload = upload.single('avatar')
 const sendEmail = async (req,res) => { 
     let testAccount = await nodemailer.createTestAccount();
     receiverData = req.userData;
+    const puncInpunchOut = 'Punch IN';
     console.log(receiverData);
 
     var transporter = nodemailer.createTransport(({
         host: "smtp.ethereal.email",
         port: 587,
         auth: {
-          user: 'zoie.dare@ethereal.email', //demo account
-          pass: 'wMttaZy7HcD2uB1kdZ'        //demo password
-        }
-      }));
-      
+            user: 'zoie.dare@ethereal.email', //demo account
+            pass: 'wMttaZy7HcD2uB1kdZ'        //demo password
+            }
+    }));
+
       var mailOptions = {
-        from: 'somerealemail@gmail.com',
+        from: 'zoie.dare@ethereal.email',
         to: receiverData.email,
-        subject: 'Sending Email using Node.js[nodemailer] to ' + receiverData.name,
-        text: 'This was successfully sent'
+        subject: `${puncInpunchOut} : ${receiverData.name} : ${moment().format('LLLL')}`,
+        text: `Login successfull at ${moment().format('LTS')}`,
       }
       
       transporter.sendMail(mailOptions, function(error, info){
         if (error) {
           console.log(error);
         } else {
+            res.json({info})
           console.log('Email sent: ' + info.response);
         }
-      });  
+      }); 
     
 }
 
@@ -234,4 +238,4 @@ module.exports =
         //     }
         //   })
           
-        //   const upload = multer({ storage: storage })
+        //   const upload = multer({ storage: storage }) console.log hiii my name is siddhesh 
