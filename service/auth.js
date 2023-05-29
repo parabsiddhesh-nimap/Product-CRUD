@@ -2,8 +2,8 @@ const jwt = require("jsonwebtoken");
 
 const secretKey = "Siddhesh$Nimap$SecretKey";
 
-function setUser(name,email,time) {
-    return jwt.sign({name,email},secretKey,{expiresIn:time});
+function setUser(user_id,name,email,time) {
+    return jwt.sign({user_id,name,email},secretKey,{expiresIn:time});
 };
 
 function getUsertoken(token) {

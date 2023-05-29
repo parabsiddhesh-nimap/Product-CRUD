@@ -14,11 +14,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   product.init({
-    productname: DataTypes.STRING
+    productname: DataTypes.STRING,
+    user_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'product',
-    logging : false,
   });
   return product;
 };
