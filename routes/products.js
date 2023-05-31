@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 const db = require('../models/index')
+const {auth} = require("../middleware/userMiddleware");
 
 //Middleware
 const checkWhetherProductExists = async (req,res,next) => {
@@ -10,10 +11,11 @@ const checkWhetherProductExists = async (req,res,next) => {
     next();   
 }
 
-// get all products
-router.get('/product', async (req, res) => {
+// get all products by user
+router.get('/product', auth,async (req, res) => {
     try{
-        let allProduct =  await db.product.findAll();
+        const {user_id} = req.userData;
+        let allProduct =  await db.product.findAll({ where: { user_id: user_id } });
         if(!allProduct.length) return res.status(404).json({error: 'No Products'});
         res.status(200).send(allProduct);
     }catch(err){
@@ -35,11 +37,12 @@ router.get('/product/:id', auth, async (req,res)=>{
 })
 
 // add new product
-router.post('/product', async (req, res) => {
+router.post('/product', auth,async (req, res) => {
     try{
-        let newProduct = req.body;
-        if (!req.body.productname) return res.status(500).json({error : "Empty Body"})
-        const product =  await db.product.create(newProduct);
+        let {productname} = req.body;
+        const {user_id} = req.userData;
+        if (!productname || !user_id) return res.status(500).json({error : "Empty Body"})
+        const product =  await db.product.create({productname,user_id});
         if(product.dataValues) return res.status(200).json({success:'Product created successfully'});
         return res.status(400).json({error: 'Product not created'});
     }catch(err){
