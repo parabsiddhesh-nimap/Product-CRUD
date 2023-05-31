@@ -21,11 +21,12 @@ router.get('/product', async (req, res) => {
     }
 });
 
-// get specific product
-router.get('/product/:id', async (req,res)=>{
+// get specific product for that user
+router.get('/product/:id', auth, async (req,res)=>{
     try{
+        const {user_id} = req.userData;
         let id = req.params.id;
-        let product =  await db.product.findOne({ where: { id } });
+        let product =  await db.product.findOne({ where: { id , user_id} });
         if(!product) return res.status(404).json({error: 'Product not found'}); 
         res.status(200).send(product);
     }catch(err){

@@ -39,6 +39,7 @@ Object.keys(db).forEach(modelName => {
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
-// sequelize.sync({force : true});
+sequelize.authenticate();
+db.user.hasMany(db.product, { foreignKey: 'user_id' })
 
 module.exports = db;
