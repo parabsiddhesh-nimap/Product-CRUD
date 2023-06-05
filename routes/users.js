@@ -23,6 +23,7 @@ const storage = multer.diskStorage({
     }
 })
 const upload = multer({ storage: storage })
+const {readExcelData,readPdfData} = require('../controller/excelReader');
 
 router.post('/signup', userSingUp,passwordValidity,createUser);
 
@@ -30,16 +31,9 @@ router.post('/login', handleUserLogin,blockAccount);
 
 router.get('/user/', auth,getUser); 
 
-router.post('/upload', auth,handleUpload, (req,res) => {
-// router.post('/upload', auth,upload.single('avatar'), (req,res) => {
-    try{ 
-        console.log(req.userData)
-        res.status(200).json({success:"Upload successful"})
-    }catch(err){
-        console.log(err);
-        res.status(500).json({ error:err.message });
-    }
-});
+router.post('/uploadExcel', auth,handleUpload,readExcelData);
+
+router.post('/uploadPdf', auth,handleUpload,readPdfData);
 
 router.delete('/user/:id', auth, (req,res) => {
     try{
@@ -62,5 +56,6 @@ router.post('/unblock', unblockUserAcc);
 
 router.post('/sendEmail',auth, sendEmail);
 
+// router.get('/readExcel',auth,readExcelData);
 
 module.exports = router;

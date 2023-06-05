@@ -13,13 +13,16 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "json2xls": "^0.1.2",
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
     "morgan": "~1.9.1",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.3.1",
     "nodemailer": "^6.9.2",
-    "sequelize": "^6.31.1"
+    "pdf-parse": "^1.1.1",
+    "sequelize": "^6.31.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.0"
