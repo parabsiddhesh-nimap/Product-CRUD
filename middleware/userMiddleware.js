@@ -91,8 +91,22 @@ const handleUserLogin = async (req, res,next) => {
         }
         else if (!newToken && chkPassword && wrongpasswordcnt<5) {
             let name = user.dataValues.name;
-            token = setUser(user_id,name, email, 40);
+            token = setUser(user_id,name, email,'2 days');
             let refreshToken = jwt.sign({user_id,name,email},secretKey);
+            let addedDate = moment().add(2, 'days').format();  //expiry set to 2 days from login date
+
+            console.log('user.user_id',user_id)
+
+            let chkFortoken = await db.user_token.findOne({ where : {user_id}});
+            console.log('chkFortoken',chkFortoken);
+            if(chkFortoken){
+                db.user_token.update({token,expiry_time : addedDate,is_valid : true},{
+                    where : {user_id}
+                })
+            }else{
+                db.user_token.create({user_id:user_id,token,expiry_time : addedDate,is_valid : true})
+            }
+
             resetpassCnt(email)
             res.status(200).json({token,refreshToken});
         } else {
